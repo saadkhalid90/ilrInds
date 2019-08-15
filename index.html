@@ -1,0 +1,47 @@
+<html>
+<style media="screen">
+  body {
+    background: black;
+  }
+
+  .slider.round {
+    border-radius: 34px;
+  }
+
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  g.colLegend {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+  g.circLegendGroup {
+    font-family: 'Roboto Condensed', sans-serif;
+  }
+</style>
+<head>
+  <meta charset="utf-8">
+  <title>World Map (Labor indicators)</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap" rel="stylesheet">
+  <script src="dict.js"></script>
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+  <script src="//d3js.org/topojson.v1.min.js"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+  <script src="https://unpkg.com/topojson-simplify@3"></script>
+  <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+</head>
+<body>
+  <div class="selctionContain">
+    <select id = "indSelect">
+
+    </select>
+    <label class= "switch">
+      <input type="checkbox">
+      <span class="slider round"> Cartogram Mode</span>
+    </label>
+  </div>
+
+  <svg class ="worldMap" width = 1200 height = 600 ></svg>
+  <script src="index.js"></script>
+</body>
+</html>
