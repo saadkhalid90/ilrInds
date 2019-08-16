@@ -2,6 +2,39 @@
 <style media="screen">
   body {
     background: black;
+    background-image: radial-gradient(circle, #424242, #393939, #313131, #292929, #212121);
+  }
+
+  #indSelect {
+    height: 40px;
+    width: 275px;
+    background: none;
+    border-color: white;
+    color: white;
+    margin-right: 10px;
+  }
+
+  #switch_contain {
+    width: 190px;
+    background: #424242;
+    height: 40px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 8px;
+    margin-left: 15px;
+  }
+
+  .selectionContain {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+
+  .map_container {
+    display: flex;
+    justify-content: center;
   }
 
   .slider.round {
@@ -17,11 +50,16 @@
   g.circLegendGroup {
     font-family: 'Roboto Condensed', sans-serif;
   }
+
 </style>
 <head>
   <meta charset="utf-8">
   <title>World Map (Labor indicators)</title>
   <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:400,700&display=swap" rel="stylesheet">
+
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
   <script src="dict.js"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
@@ -31,17 +69,36 @@
   <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
 </head>
 <body>
-  <div class="selctionContain">
+  <div class="selectionContain">
     <select id = "indSelect">
-
     </select>
-    <label class= "switch">
-      <input type="checkbox">
-      <span class="slider round"> Cartogram Mode</span>
-    </label>
-  </div>
 
-  <svg class ="worldMap" width = 1200 height = 600 ></svg>
+    <div id="switch_contain">
+      <div id="carto_switch" class="mdc-switch mdc-theme--on-surface">
+        <div class="mdc-switch__track"></div>
+        <div class="mdc-switch__thumb-underlay">
+          <div class="mdc-switch__thumb">
+              <input type="checkbox" id="basic-switch" class="mdc-switch__native-control mdc-theme--primary" role="switch">
+          </div>
+        </div>
+      </div>
+      <label for="basic-switch" style="color: white">Cartogram Mode</label>
+      </div>
+    </div>
+
+
+  <div class="map_container">
+    <svg class ="worldMap" width = 1200 height = 600 ></svg>
+  </div>
   <script src="index.js"></script>
+
+  <script>
+    var switchState =  new mdc.switchControl.MDCSwitch(document.querySelector('.mdc-switch'));
+
+    document.querySelector('.mdc-switch').addEventListener("click", function () {
+      singleInstanceChangeCarto();
+    });
+
+  </script>
 </body>
 </html>

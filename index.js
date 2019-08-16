@@ -286,12 +286,17 @@ async function changeCarto(){
   cartLog = toCarto;
 
   if (toCarto == true){
+    var carto_switch = document.getElementById("carto_switch");
+    carto_switch.classList.add("mdc-switch--disabled");
+
     await updatePaths(d3.selectAll('path.country'), 1000 , 'black', 0.1);
     await drawBubbles(d3.select('svg'), nodes, indName, 1000)
     await updateBubbles(d3.selectAll('circle.country'), 1000, toCarto);
 
     // add legend
     makeNestCircLegend('svg', [50, 400], [25000000, 100000000], bubScale, 'Labor Force Size')
+
+    carto_switch.classList.remove("mdc-switch--disabled");
   }
   else {
     let smallizeBub = updateBubbles(d3.selectAll('circle.country'), 1000, toCarto)
