@@ -102,9 +102,8 @@ async function readAndDraw(){
 
   await forceSimulate();
 
-
-
   console.log(nodes);
+
 
   drawMap(SVG, nodes, indName);
 }
@@ -209,7 +208,8 @@ function drawMap(svgSelect, nodes, indName){
           .enter()
           .append('path')
           .attr('d', d => path(d))
-          .attr('class', 'country')
+          .attr('class', d => d.properties.ADM0_A3)
+          .classed('country', true)
           .style('fill', d => {
             return d.data.ilr ? colScale(d.data.ilr[indName]) : 'grey';
           })
@@ -217,6 +217,8 @@ function drawMap(svgSelect, nodes, indName){
           .style('stroke-width', '0.5px');
 
           drawLegend();
+
+          actHov(d3.selectAll('path.country'));
 }
 
 function drawBubbles(svgSelect, nodes, indName, transTime){
@@ -227,7 +229,8 @@ function drawBubbles(svgSelect, nodes, indName, transTime){
             .data(nodes)
             .enter()
             .append('circle')
-            .attr('class', 'country')
+            .attr('class', d => d.properties.ADM0_A3)
+            .classed('country', true)
             .attr('cx', d => d.x0)
             .attr('cy', d => d.y0)
             .attr('r', 0)
@@ -294,7 +297,9 @@ async function changeCarto(){
     await updateBubbles(d3.selectAll('circle.country'), 1000, toCarto);
 
     // add legend
-    makeNestCircLegend('svg', [50, 400], [25000000, 100000000], bubScale, 'Labor Force Size')
+    makeNestCircLegend('svg', [50, 400], [25000000, 100000000], bubScale, 'Labor Force Size');
+    deactHov(d3.selectAll('path.country'));
+    actHov(d3.selectAll('circle.country'));
 
     carto_switch.classList.remove("mdc-switch--disabled");
   }
@@ -302,6 +307,8 @@ async function changeCarto(){
     let smallizeBub = updateBubbles(d3.selectAll('circle.country'), 1000, toCarto)
     smallizeBub.then(res => {
       d3.selectAll('circle.country').remove();
+      deactHov(d3.selectAll('circle.country'));
+      actHov(d3.selectAll('path.country'));
     });
     updatePaths(d3.selectAll('path.country'), 1000, 'black', 1)
 
@@ -317,17 +324,90 @@ function getSingleInstanceChangeCarto(){
   let callInProgress;
   return async function(){
     if(callInProgress){
-      console.log('other call in progress')
+      //console.log('other call in progress')
       return;
     }
 
-    console.log('called changeCarto')
+    //console.log('called changeCarto')
 
     callInProgress = true;
     await changeCarto();
     callInProgress = false;
   }
 }
+
+function drawCircVoronoi(nodes, dim){
+  var voronoi = d3.voronoi()
+    							.x(d => d.x)
+    							.y(d => d.y)
+    							.extent([[0, 0], dim])
+
+  let polygonData = voronoi.polygons(nodes).filter(d => d);
+  let polDatNodes = polygonData.map(d => d.data);
+
+
+  function addClipPaths(svgSelect, clipIDFun){
+    var polygon =  svgSelect.append("defs")
+                        .selectAll(".clip")
+                        .data(polygonData)
+                        //First append a clipPath element
+                        .enter().append("clipPath")
+                        .attr("class", "clip")
+                        //Make sure each clipPath will have a unique id (connected to the circle element)
+                        .attr("id", clipIDFun)
+                        //Then append a path element that will define the shape of the clipPath
+                        .append("path")
+                        .attr("class", "clip-path-circle")
+                        .attr("d", function(d) { return "M" + d.join(",") + "Z"; })
+  }
+
+  addClipPaths(SVG, d => d.data.properties.ADM0_A3);
+
+  //Append larger circles
+
+  function addCircleCatchers(svgSelect, circleClassFun){
+    var circleCatchers = svgSelect.selectAll(".circle-catcher")
+        .data(polDatNodes)
+        .enter().append("circle")
+        .attr("class", circleClassFun)
+        .classed("circle-catcher", true)
+        //Apply the clipPath element by referencing the one with the same countryCode
+        .attr("clip-path", d => "url(#" + d.properties.ADM0_A3)
+        //Bottom line for safari, which doesn't accept attr for clip-path
+        .style("clip-path", d => "url(#" + d.properties.ADM0_A3)
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        //Make the radius a lot bigger
+        //.attr("r", d => d.r >= 50 ? 90 : 50)
+        .attr("r", d => d.r + (((90 - d.r)/90) * 40))
+        .style("fill", "grey")
+        .style("opacity", 0.5)
+        .style("pointer-events", "all")
+        //Notice that we now have the mousover events on these circles
+        // .on("mouseover", activateHover(100))
+        // .on("mouseout",  deactivateHover(100));
+  }
+
+  addCircleCatchers(SVG, d => d.properties.ADM0_A3);
+
+}
+
+function actHov(selection){
+  selection.on('mouseover', function(d, i){
+    d3.select(this).append('title')
+      .text(d => d.properties.ADMIN)
+  })
+
+  selection.on('mouseout', function(d, i){
+    d3.select(this).select('title').remove();
+  })
+}
+
+function deactHov(selection){
+  selection.on('mouseover', null)
+  selection.on('mouseout', null)
+}
+
 
 let singleInstanceChangeCarto = getSingleInstanceChangeCarto();
 
@@ -378,6 +458,10 @@ function  listSelector(selectorID, array){
     option.setAttribute('value', array[i]);
     selectN.insertBefore(option, selectN.lastChild);
   }
+}
+
+function randRange(min, max){
+  return (Math.random() * (max - min) + min)
 }
 
 listSelector('indSelect', indTitles);
