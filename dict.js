@@ -60,7 +60,8 @@ let indOptionKey = [
   },
   {
     A : 'less than or equal to 48 hours',
-    B : '49-56 hours;C:57-60 hours',
+    B : '49-56 hours',
+    C : '57-60 hours',
     D : '61 or more hours',
     E : 'No clear provision',
     Z : 'Insufficient Data'
